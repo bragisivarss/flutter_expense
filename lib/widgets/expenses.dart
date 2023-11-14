@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:expense/models/expense.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
 class Expenses extends StatefulWidget {
   const Expenses({super.key});
 
@@ -33,20 +32,20 @@ class _ExpensesState extends State<Expenses> {
 
   void _addExpenseOverlay() {
     showModalBottomSheet(
+      useSafeArea: true,
       isScrollControlled: true,
       context: context,
       builder: (ctx) => NewExpense(onAddExpense: _addExpense),
     );
   }
 
-  void _addExpense(Expense expense){
+  void _addExpense(Expense expense) {
     setState(() {
-    _registeredExpenses.add(expense);
-      
+      _registeredExpenses.add(expense);
     });
   }
 
-  void _removeExpense(Expense expense){
+  void _removeExpense(Expense expense) {
     final expenseIndex = _registeredExpenses.indexOf(expense);
 
     setState(() {
@@ -65,36 +64,31 @@ class _ExpensesState extends State<Expenses> {
           },
           label: 'Undo',
         ),
-        ),
-        );
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     Widget mainContent = Center(
-      child: Text('No expenses registered, please add some!',
-      style: GoogleFonts.aBeeZee(
-        fontSize: 18,
-        fontWeight: FontWeight.bold
+      child: Text(
+        'No expenses registered, please add some!',
+        style: GoogleFonts.aBeeZee(fontSize: 18, fontWeight: FontWeight.bold),
       ),
-    ),
     );
 
-    if(_registeredExpenses.isNotEmpty) {
+    if (_registeredExpenses.isNotEmpty) {
       mainContent = ExpenseList(
-              expenses: _registeredExpenses, 
-              onRemoveExpense: _removeExpense
-            );
+          expenses: _registeredExpenses, onRemoveExpense: _removeExpense);
     }
-
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Expense Tracker!',
-          style: GoogleFonts.alef(
-            fontWeight: FontWeight.bold
-          ),
+          style: GoogleFonts.alef(fontWeight: FontWeight.bold),
         ),
         shadowColor: Colors.blueGrey,
         actions: [
@@ -104,14 +98,21 @@ class _ExpensesState extends State<Expenses> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Chart(expenses: _registeredExpenses),
-          Expanded(
-            child: mainContent 
-          ),
-        ],
-      ),
+      body: width < 550
+          ? Column(
+              children: [
+                Chart(expenses: _registeredExpenses),
+                Expanded(child: mainContent),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(
+                  child: Chart(expenses: _registeredExpenses),
+                ),
+                Expanded(child: mainContent),
+              ],
+            ),
     );
   }
 }

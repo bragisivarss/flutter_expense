@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:expense/models/expense.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class NewExpense extends StatefulWidget {
@@ -69,14 +70,14 @@ class _NewExpenseState extends State<NewExpense> {
       return;
     }
 
-    widget.onAddExpense(Expense(
-        title: _titleController.text,
-        amount: enteredAmount,
-        date: _selectedDate!,
-        category: _selectedCategory
-        ),
-        );
-        Navigator.pop(context);
+    widget.onAddExpense(
+      Expense(
+          title: _titleController.text,
+          amount: enteredAmount,
+          date: _selectedDate!,
+          category: _selectedCategory),
+    );
+    Navigator.pop(context);
   }
 
   @override
@@ -88,105 +89,202 @@ class _NewExpenseState extends State<NewExpense> {
 
   @override
   Widget build(BuildContext context) {
-    return Container( 
-      color: const Color.fromARGB(255, 223, 210, 249), 
-    child: Padding(
-      padding: const EdgeInsets.fromLTRB(16, 50, 16, 16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _titleController,
-              // onChanged: _saveTitleInput,
-              maxLength: 50,
-              decoration: InputDecoration(
-                label: Text('Title',
-                style: GoogleFonts.aBeeZee(),
-                ),
-              ),
-            ),
-        
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _amountController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      prefixText: '\$',
-                      label: Text('Amount',
-                      style: GoogleFonts.aBeeZee(),
+    final keyboardSpace = MediaQuery.of(context).viewInsets.bottom;
+    return LayoutBuilder(builder: (ctx, constraints) {
+      final width = constraints.maxWidth;
+
+      return Container(
+        color: const Color.fromARGB(255, 223, 210, 249),
+        child: SizedBox(
+          height: double.infinity,
+          width: double.infinity,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16, 16, 16, keyboardSpace + 16),
+              child: Column(
+                children: [
+                  if (width >= 600)
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _titleController,
+                            // onChanged: _saveTitleInput,
+                            maxLength: 50,
+                            decoration: InputDecoration(
+                              label: Text(
+                                'Title',
+                                style: GoogleFonts.aBeeZee(),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 24,
+                        ),
+                        Expanded(
+                          child: TextField(
+                            controller: _amountController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              prefixText: '\$',
+                              label: Text(
+                                'Amount',
+                                style: GoogleFonts.aBeeZee(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    TextField(
+                      controller: _titleController,
+                      // onChanged: _saveTitleInput,
+                      maxLength: 50,
+                      decoration: InputDecoration(
+                        label: Text(
+                          'Title',
+                          style: GoogleFonts.aBeeZee(),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(
-                  width: 16,
-                ),
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(_selectedDate == null
-                          ? 'No date selected'
-                          : formatter.format(_selectedDate!),
-                          style: GoogleFonts.aBeeZee(),
-                          
+                  if (width >= 600)
+                    Row(
+                      children: [
+                        DropdownButton(
+                            value: _selectedCategory,
+                            items: Category.values
+                                .map(
+                                  (category) => DropdownMenuItem(
+                                    value: category,
+                                    child: Text(
+                                      category.name.toUpperCase(),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                            onChanged: (value) {
+                              if (value == null) {
+                                return;
+                              }
+                              setState(() {
+                                _selectedCategory = value;
+                              });
+                            }),
+                        const SizedBox(
+                          width: 24,
+                        ),
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                _selectedDate == null
+                                    ? 'No date selected'
+                                    : formatter.format(_selectedDate!),
+                                style: GoogleFonts.aBeeZee(),
+                              ),
+                              IconButton(
+                                onPressed: _presentDate,
+                                icon: const Icon(Icons.calendar_month),
+                              ),
+                            ],
                           ),
-                      IconButton(
-                        onPressed: _presentDate,
-                        icon: const Icon(Icons.calendar_month),
+                        ),
+                      ],
+                    )
+                  else
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _amountController,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              prefixText: '\$',
+                              label: Text(
+                                'Amount',
+                                style: GoogleFonts.aBeeZee(),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 16,
+                        ),
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                _selectedDate == null
+                                    ? 'No date selected'
+                                    : formatter.format(_selectedDate!),
+                                style: GoogleFonts.aBeeZee(),
+                              ),
+                              IconButton(
+                                onPressed: _presentDate,
+                                icon: const Icon(Icons.calendar_month),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  Row(
+                    children: [
+                      DropdownButton(
+                          value: _selectedCategory,
+                          items: Category.values
+                              .map(
+                                (category) => DropdownMenuItem(
+                                  value: category,
+                                  child: Text(
+                                    category.name.toUpperCase(),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value == null) {
+                              return;
+                            }
+                            setState(() {
+                              _selectedCategory = value;
+                            });
+                          }),
+                      const Spacer(),
+                      ElevatedButton(
+                        onPressed: _submitData,
+                        child: Text(
+                          'Save Expense',
+                          style: GoogleFonts.aBeeZee(),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          'Close',
+                          style: GoogleFonts.aBeeZee(),
+                        ),
                       ),
                     ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(
-              height: 20,
-            ),
-            Row(
-              children: [
-                DropdownButton(
-                    value: _selectedCategory,
-                    items: Category.values
-                        .map(
-                          (category) => DropdownMenuItem(
-                            value: category,
-                            child: Text(
-                              category.name.toUpperCase(),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (value) {
-                      if (value == null) {
-                        return;
-                      }
-                      setState(() {
-                        _selectedCategory = value;
-                      });
-                    }),
-                const Spacer(),
-                ElevatedButton(
-                  onPressed: _submitData,
-                  child: Text('Save Expense',
-                  style: GoogleFonts.aBeeZee(),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('Close',
-                  style: GoogleFonts.aBeeZee(),
-                  ),
-                ),
-              ],
-            ),
-          ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }
