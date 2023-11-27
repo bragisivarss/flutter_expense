@@ -48,8 +48,6 @@ class ExpenseBucket {
   final Category category;
   final List<Expense> expenses;
 
-  
-
   double get totalExpenses {
     double sum = 0;
 
